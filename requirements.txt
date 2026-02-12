@@ -14,7 +14,6 @@ future==1.0.0
 idna==3.11
 line-bot-sdk==3.22.0
 multidict==6.7.1
-packaging @ file:///C:/miniconda3/conda-bld/packaging_1761049137378/work
 pillow==12.1.0
 propcache==0.4.1
 psycopg==3.3.2
