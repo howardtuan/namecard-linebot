@@ -19,9 +19,9 @@ services:
       dockerfile: Dockerfile
     container_name: namecard-linebot-web
     command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
-    working_dir: /app/bot
+    working_dir: /app
     env_file:
-      - ./bot/.env
+      - ./.env
     environment:
       DEBUG: "True"
       ALLOWED_HOSTS: "*"
@@ -36,7 +36,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./bot:/app/bot
+      - .:/app
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:8000/ || exit 1"]
       interval: 10s

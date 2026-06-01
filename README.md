@@ -20,18 +20,20 @@
 ```text
 .
 ├── bot/
-│   ├── bot/                 # Django project settings/urls
-│   ├── cards/               # 名片 app
-│   │   ├── services/
-│   │   │   ├── flex.py      # LINE Flex JSON
-│   │   │   ├── gemma.py     # Google AI Studio / Gemma 辨識
-│   │   │   └── search.py    # 名片搜尋
-│   │   ├── models.py
-│   │   └── views.py         # LINE webhook
-│   ├── .env.example
-│   └── manage.py
+│   ├── settings.py          # Django settings
+│   ├── urls.py
+│   └── wsgi.py
+├── cards/                   # 名片 app
+│   ├── services/
+│   │   ├── flex.py          # LINE Flex JSON
+│   │   ├── gemma.py         # Google AI Studio / Gemma 辨識
+│   │   └── search.py        # 名片搜尋
+│   ├── models.py
+│   └── views.py             # LINE webhook
+├── .env.example
 ├── Dockerfile
 ├── docker-compose.yml
+├── manage.py
 └── requirements.txt
 ```
 
@@ -47,7 +49,7 @@
 ## 環境變數
 
 ```bash
-cp bot/.env.example bot/.env
+cp .env.example .env
 ```
 
 至少填這幾個：
@@ -136,8 +138,8 @@ https://your-service.zeabur.app/webhook/
 ```bash
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
-USE_SQLITE=True .venv/bin/python bot/manage.py check
-USE_SQLITE=True .venv/bin/python bot/manage.py test cards
+USE_SQLITE=True .venv/bin/python manage.py check
+USE_SQLITE=True .venv/bin/python manage.py test cards
 ```
 
 `USE_SQLITE=True` 只給本機快速測試用；正式執行仍建議使用 PostgreSQL。

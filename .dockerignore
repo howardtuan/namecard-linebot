@@ -6,7 +6,7 @@ __pycache__/
 *.pyd
 .venv/
 venv/
-bot/.env
-bot/media/
-bot/db.sqlite3
-bot/staticfiles/
+.env
+media/
+db.sqlite3
+staticfiles/

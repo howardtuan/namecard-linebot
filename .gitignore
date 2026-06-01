@@ -1,7 +1,7 @@
-bot/.env
-bot/db.sqlite3
-bot/media/
-bot/staticfiles/
+.env
+db.sqlite3
+media/
+staticfiles/
 .venv/
 venv/
 __pycache__/

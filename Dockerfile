@@ -12,9 +12,9 @@ RUN apt-get update \
 COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
-COPY bot /app/bot
+COPY . /app
 
-WORKDIR /app/bot
+WORKDIR /app
 
 EXPOSE 8000
 
