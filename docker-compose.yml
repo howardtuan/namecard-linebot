@@ -20,7 +20,11 @@ services:
     container_name: namecard-linebot-web
     command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     working_dir: /app/bot
+    env_file:
+      - ./bot/.env
     environment:
+      DEBUG: "True"
+      ALLOWED_HOSTS: "*"
       POSTGRES_DB: line_cards
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -33,6 +37,11 @@ services:
       - "8000:8000"
     volumes:
       - ./bot:/app/bot
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:

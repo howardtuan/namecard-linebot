@@ -1,1 +1,8 @@
 bot/.env
+bot/db.sqlite3
+bot/media/
+bot/staticfiles/
+.venv/
+venv/
+__pycache__/
+*.pyc

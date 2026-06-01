@@ -8,3 +8,5 @@ __pycache__/
 venv/
 bot/.env
 bot/media/
+bot/db.sqlite3
+bot/staticfiles/
