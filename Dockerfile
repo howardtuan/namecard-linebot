@@ -2,6 +2,8 @@ FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV PORT=8080
+ENV GUNICORN_TIMEOUT=180
 
 WORKDIR /app
 
@@ -16,6 +18,6 @@ COPY . /app
 
 WORKDIR /app
 
-EXPOSE 8000
+EXPOSE 8080
 
-CMD ["sh", "-c", "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn bot.wsgi:application --bind 0.0.0.0:${PORT:-8000}"]
+CMD ["sh", "-c", "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn bot.wsgi:application --bind 0.0.0.0:${PORT:-8080} --timeout ${GUNICORN_TIMEOUT:-180}"]
