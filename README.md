@@ -58,7 +58,6 @@ cp .env.example .env
 LINE_CHANNEL_ACCESS_TOKEN=...
 LINE_CHANNEL_SECRET=...
 GOOGLE_API_KEY=...
-PUBLIC_BASE_URL=https://your-public-domain
 ```
 
 預設模型是 `gemma-4-26b-a4b-it`。想改模型可調整：
@@ -117,7 +116,6 @@ DEBUG=False
 DJANGO_SECRET_KEY=請換成長隨機字串
 ALLOWED_HOSTS=your-service.zeabur.app
 CSRF_TRUSTED_ORIGINS=https://your-service.zeabur.app
-PUBLIC_BASE_URL=https://your-service.zeabur.app
 LINE_CHANNEL_ACCESS_TOKEN=...
 LINE_CHANNEL_SECRET=...
 GOOGLE_API_KEY=...
@@ -146,6 +144,6 @@ USE_SQLITE=True .venv/bin/python manage.py test cards
 
 ## 注意事項
 
-- LINE Flex 的圖片 URL 需要 HTTPS。若 `PUBLIC_BASE_URL` 不是 HTTPS，Flex 卡片會只顯示文字資訊，不放原始名片圖。
-- 目前圖片存放在 Django media 目錄。若正式服務需要長期保存原圖，可再接 S3、Cloud Storage 或其他物件儲存。
+- 名片圖片只會暫存在 Django media 目錄供 AI 分析；分析結束後會刪除原始圖片並清空 `image` 欄位。
+- LINE Flex 名片與搜尋結果只顯示辨識後的虛擬名片資料，不會再附原始名片圖。
 - AI 辨識不保證 100% 正確，後台可用 Django Admin 修正資料。

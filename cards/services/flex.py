@@ -1,6 +1,5 @@
 from urllib.parse import quote
 
-from django.conf import settings
 from linebot.models import BubbleContainer, CarouselContainer, FlexSendMessage
 
 from cards.models import BusinessCard
@@ -95,16 +94,6 @@ def build_card_bubble(card: BusinessCard, compact: bool = False) -> dict:
         },
     }
 
-    hero_url = _image_url(card)
-    if hero_url and not compact:
-        bubble["hero"] = {
-            "type": "image",
-            "url": hero_url,
-            "size": "full",
-            "aspectRatio": "20:13",
-            "aspectMode": "cover",
-        }
-
     footer_contents = _footer_buttons(card)
     if footer_contents:
         bubble["footer"] = {
@@ -197,8 +186,3 @@ def _button(label: str, uri: str) -> dict:
         },
     }
 
-
-def _image_url(card: BusinessCard) -> str:
-    if not settings.PUBLIC_BASE_URL.startswith("https://") or not card.image:
-        return ""
-    return f"{settings.PUBLIC_BASE_URL}{card.image.url}"

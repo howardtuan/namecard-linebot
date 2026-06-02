@@ -25,7 +25,7 @@ class CardTag(models.Model):
 
 class BusinessCard(models.Model):
     owner = models.ForeignKey(LineUser, on_delete=models.CASCADE, related_name="cards")
-    image = models.ImageField(upload_to="business_cards/%Y/%m/%d/")
+    image = models.ImageField(upload_to="business_cards/%Y/%m/%d/", blank=True)
     source_message_id = models.CharField(max_length=128, blank=True, db_index=True)
 
     name = models.CharField(max_length=100, blank=True)

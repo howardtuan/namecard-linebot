@@ -4,7 +4,6 @@ from io import BytesIO
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.exceptions import ImproperlyConfigured
-from django.db import transaction
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
 from django.views.decorators.csrf import csrf_exempt
 from linebot import LineBotApi, WebhookParser
@@ -98,7 +97,10 @@ def handle_message_event(line_bot_api: LineBotApi, event: MessageEvent) -> None:
 
     if isinstance(event.message, ImageMessage):
         reply = handle_image_message(line_bot_api, user, event.message)
-    elif isinstance(event.message, TextMessage):
+        safe_reply(line_bot_api, event.reply_token, reply)
+        return
+
+    if isinstance(event.message, TextMessage):
         reply = handle_text_message(user, event.message.text)
     else:
         reply = TextSendMessage(text="請上傳名片照片，或輸入關鍵字搜尋名片。")
@@ -130,26 +132,58 @@ def get_or_create_user(line_bot_api: LineBotApi, line_user_id: str) -> LineUser:
     return user
 
 
-def handle_image_message(line_bot_api: LineBotApi, user: LineUser, message: ImageMessage):
-    image_bytes = download_message_content(line_bot_api, message.id)
-    mime_type, extension = detect_image_type(image_bytes)
+def handle_image_message(line_bot_api: LineBotApi, user: LineUser, message: ImageMessage | str):
+    message_id = message if isinstance(message, str) else message.id
+    card = BusinessCard.objects.filter(owner=user, source_message_id=message_id).order_by("-created_at").first()
+    if card:
+        if card.extraction_error:
+            return TextSendMessage(text=f"這張名片先前 AI 辨識失敗：{card.extraction_error}")
+        if has_extracted_card_data(card):
+            return build_card_flex_message(card)
 
-    with transaction.atomic():
-        card = BusinessCard.objects.create(owner=user, source_message_id=message.id)
-        filename = f"{user.line_user_id}_{message.id}.{extension}"
+    if not card:
+        image_bytes = download_message_content(line_bot_api, message_id)
+        mime_type, extension = detect_image_type(image_bytes)
+        card = BusinessCard.objects.create(owner=user, source_message_id=message_id)
+        filename = f"{user.line_user_id}_{message_id}.{extension}"
+        card.image.save(filename, ContentFile(image_bytes), save=True)
+    elif not card.image:
+        image_bytes = download_message_content(line_bot_api, message_id)
+        mime_type, extension = detect_image_type(image_bytes)
+        filename = f"{user.line_user_id}_{message_id}.{extension}"
         card.image.save(filename, ContentFile(image_bytes), save=True)
 
+    image_path = card.image.path
+
     try:
-        extracted = extract_business_card(card.image.path)
+        extracted = extract_business_card(image_path)
     except CardExtractionError as exc:
         card.extraction_error = str(exc)
         card.extraction_model = settings.GEMMA_MODEL
         card.refresh_normalized_text()
         card.save(update_fields=["extraction_error", "extraction_model", "normalized_text", "updated_at"])
         return TextSendMessage(text=f"名片照片已收到，但 AI 辨識失敗：{exc}")
+    finally:
+        delete_card_image_file(card)
 
     apply_extracted_card(card, extracted)
     return build_card_flex_message(card)
+
+
+def has_extracted_card_data(card: BusinessCard) -> bool:
+    return any(
+        [
+            card.name,
+            card.company,
+            card.title,
+            card.email,
+            card.phone,
+            card.address,
+            card.website,
+            card.note,
+            card.raw_text,
+        ]
+    )
 
 
 def handle_text_message(user: LineUser, text: str):
@@ -204,6 +238,20 @@ def apply_extracted_card(card: BusinessCard, extracted: ExtractedCard) -> None:
 
     card.refresh_normalized_text()
     card.save(update_fields=["normalized_text", "updated_at"])
+
+
+def delete_card_image_file(card: BusinessCard) -> None:
+    if not card.image:
+        return
+
+    image_name = card.image.name
+    try:
+        card.image.delete(save=False)
+    except Exception:
+        logger.exception("Failed to delete uploaded business card image: %s", image_name)
+
+    card.image = ""
+    card.save(update_fields=["image", "updated_at"])
 
 
 def remember_last_query(user: LineUser, keyword: str) -> None:
