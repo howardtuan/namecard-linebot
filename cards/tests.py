@@ -93,6 +93,12 @@ class CardSearchTests(TestCase):
         self.assertEqual(results, [self.card])
 
 
+class UrlFieldLengthTests(TestCase):
+    def test_url_fields_are_long_enough_for_line_and_ai_urls(self):
+        self.assertEqual(LineUser._meta.get_field("picture_url").max_length, 1000)
+        self.assertEqual(BusinessCard._meta.get_field("website").max_length, 1000)
+
+
 class FlexMessageTests(TestCase):
     def test_build_card_bubble_contains_primary_fields(self):
         user = LineUser.objects.create(line_user_id="U123")

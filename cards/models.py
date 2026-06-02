@@ -4,7 +4,7 @@ from django.db import models
 class LineUser(models.Model):
     line_user_id = models.CharField(max_length=64, unique=True, db_index=True)
     display_name = models.CharField(max_length=100, blank=True)
-    picture_url = models.URLField(blank=True)
+    picture_url = models.URLField(blank=True, max_length=1000)
     status_message = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -34,7 +34,7 @@ class BusinessCard(models.Model):
     email = models.EmailField(blank=True)
     phone = models.CharField(max_length=80, blank=True)
     address = models.CharField(max_length=255, blank=True)
-    website = models.URLField(blank=True)
+    website = models.URLField(blank=True, max_length=1000)
     note = models.TextField(blank=True)
 
     raw_text = models.TextField(blank=True)
